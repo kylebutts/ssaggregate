@@ -6,7 +6,7 @@
 \alias{_PACKAGE}
 \title{ssaggregate: Create industry-level aggregates for shift-share IV}
 \description{
-ssaggregate converts "location-level" variables in a shift-share IV dataset to a dataset of exposure-weighted "industry-level" aggregates, as described in Borusyak, Hull, and Jaravel (2020).
+ssaggregate converts "location-level" variables in a shift-share IV dataset to a dataset of exposure-weighted "industry-level" aggregates, as described in Borusyak, Hull, and Jaravel (2022).
 }
 \author{
 \strong{Maintainer}: Kyle Butts \email{kyle.butts@colorado.edu} (\href{https://orcid.org/0000-0002-9048-8059}{ORCID})

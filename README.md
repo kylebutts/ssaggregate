@@ -9,7 +9,7 @@
 ssaggregate converts “location-level” variables in a shift-share IV
 dataset to a dataset of exposure-weighted “industry-level” aggregates,
 as described in [Borusyak, Hull, and Jaravel
-(2020)](https://uc6b7982a5764cd8c439602fced8.dl.dropboxusercontent.com/cd/0/inline2/BhreAHbJxwFfC325p4h_eLzzk9UsTf2ILha-np-4EXHOruYsWACqtHjKLIyjStn8b1nhJGZj99mEZjoc1pDf1wsdkRzdug_MrLsc_sd8e4nxTcDJpMpAvIXGMAnc5-okB1jakQRZUF9_rdgB8jOevC8Z8CAbgkl2OygM9ck3nljB4a3JYgc9A3URadjmnkXaGyjvz66G11Q7kfD3k7Dum9LEOEBi57gphYl8ncporsEGA0Kc3RfHKQN_mUqyjkekupU7ggmlZ6FgfdraXawftrf794iI1RTRIeX0OG1dLv-dIVIQ00wJCyCog3AlgkJIeU4_U3mW6Bif2MIlvkLNBSXhTmjxPK-SF5kdNDCR7dO-dBv3aumB_kJwmR0PUqniDThG51sC0KXWV-jXPoGaW0FcN2DWfVaohX2KREtcU1gJyg/file).
+(2022)](https://uc6b7982a5764cd8c439602fced8.dl.dropboxusercontent.com/cd/0/inline2/BhreAHbJxwFfC325p4h_eLzzk9UsTf2ILha-np-4EXHOruYsWACqtHjKLIyjStn8b1nhJGZj99mEZjoc1pDf1wsdkRzdug_MrLsc_sd8e4nxTcDJpMpAvIXGMAnc5-okB1jakQRZUF9_rdgB8jOevC8Z8CAbgkl2OygM9ck3nljB4a3JYgc9A3URadjmnkXaGyjvz66G11Q7kfD3k7Dum9LEOEBi57gphYl8ncporsEGA0Kc3RfHKQN_mUqyjkekupU7ggmlZ6FgfdraXawftrf794iI1RTRIeX0OG1dLv-dIVIQ00wJCyCog3AlgkJIeU4_U3mW6Bif2MIlvkLNBSXhTmjxPK-SF5kdNDCR7dO-dBv3aumB_kJwmR0PUqniDThG51sC0KXWV-jXPoGaW0FcN2DWfVaohX2KREtcU1gJyg/file).
 
 ## Details
 
@@ -52,7 +52,7 @@ of variable `y` is also named `y`.
 
 Including the addmissing option generates a “missing industry”
 observation, with exposure weights equal to one minus the sum of a
-location’s exposure weights. Borusyak, Hull, and Jaravel (2020)
+location’s exposure weights. Borusyak, Hull, and Jaravel (2022)
 recommend including this option when the the sum of exposure weights
 varies across locations (see Section 3.2). The missing industry
 observations will be identified by `NA` in `n`.
@@ -61,7 +61,7 @@ Note that no information on industry shocks is used in the execution of
 ssaggregate; once run, users can merge shocks and any industry-level
 controls to the aggregated dataset. They can then estimate and validate
 quasi-experimental shift-share IV regressions with other Stata
-procedures. See Section 4 of Borusyak, Hull, and Jaravel (2020) for
+procedures. See Section 4 of Borusyak, Hull, and Jaravel (2022) for
 details and below for examples of such procedures.
 
 ## `ssaggregate` examples
@@ -252,6 +252,6 @@ fixest::feols(l_sh_routine33 ~ g + year, data = industry_df,
 #> RMSE: 0.018808   Adj. R2: -2.71e-4
 ```
 
-*See Borusyak, Hull, and Jaravel (2020) for other examples of
+*See Borusyak, Hull, and Jaravel (2022) for other examples of
 shock-level analyses and guidance on specifying and validating a
 quasi-experimental shift-share IV.*

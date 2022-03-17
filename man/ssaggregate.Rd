@@ -46,12 +46,12 @@ Fixed effects specified after "\code{|}".}
 }
 \value{
 A \code{data.table} of exposure-weighted "industry-level" aggregates, as
-described in Borusyak, Hull, and Jaravel (2020).
+described in Borusyak, Hull, and Jaravel (2022).
 }
 \description{
 ssaggregate converts "location-level" variables in a shift-share IV
 dataset to a dataset of exposure-weighted "industry-level" aggregates,
-as described in Borusyak, Hull, and Jaravel (2020).
+as described in Borusyak, Hull, and Jaravel (2022).
 }
 \details{
 There are two ways to specify ssaggregate, depending on whether the
@@ -92,7 +92,7 @@ first residualized by the control variables. Formula following
 
 Including the addmissing option generates a "missing industry" observation,
 with exposure weights equal to one minus the sum of a location's exposure
-weights. Borusyak, Hull, and Jaravel (2020) recommend including this option
+weights. Borusyak, Hull, and Jaravel (2022) recommend including this option
 when the the sum of exposure weights varies across locations
 (see Section 3.2). The missing industry observations will be identified by
 \code{NA} in \code{n}.
@@ -101,7 +101,7 @@ Note that no information on industry shocks is used in the execution of
 ssaggregate; once run, users can merge shocks and any industry-level
 controls to the aggregated dataset.  They can then estimate and validate
 quasi-experimental shift-share IV regressions with other Stata procedures.
-See Section 4 of Borusyak, Hull, and Jaravel (2020) for details and
+See Section 4 of Borusyak, Hull, and Jaravel (2022) for details and
 below for examples of such procedures.
 }
 \section{Examples}{
@@ -266,7 +266,7 @@ Shock-level balance check\if{html}{\out{<div class="sourceCode r">}}\preformatte
 #> RMSE: 0.018808   Adj. R2: -2.71e-4
 }\if{html}{\out{</div>}}
 
-\emph{See Borusyak, Hull, and Jaravel (2020) for other examples of shock-level
+\emph{See Borusyak, Hull, and Jaravel (2022) for other examples of shock-level
 analyses and guidance on specifying and validating a quasi-experimental
 shift-share IV.}
 }

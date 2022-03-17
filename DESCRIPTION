@@ -11,7 +11,7 @@ Authors@R:
 Description: 
   ssaggregate converts "location-level" variables in a shift-share IV
     dataset to a dataset of exposure-weighted "industry-level"
-    aggregates, as described in Borusyak, Hull, and Jaravel (2020).
+    aggregates, as described in Borusyak, Hull, and Jaravel (2022).
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
