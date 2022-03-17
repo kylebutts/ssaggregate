@@ -1,0 +1,8 @@
+R/dev.R
+
+^LICENSE\.md$
+^.*\.Rproj$
+^\.Rproj\.user$
+^ssaggregate\.ado$
+^data-raw$
+^README.Rmd$
