@@ -1,0 +1,154 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# ssaggregate
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+ssaggregate converts "location-level" variables in a shift-share IV
+dataset to a dataset of exposure-weighted "industry-level" aggregates,
+as described in [Borusyak, Hull, and Jaravel (2020)](https://uc6b7982a5764cd8c439602fced8.dl.dropboxusercontent.com/cd/0/inline2/BhreAHbJxwFfC325p4h_eLzzk9UsTf2ILha-np-4EXHOruYsWACqtHjKLIyjStn8b1nhJGZj99mEZjoc1pDf1wsdkRzdug_MrLsc_sd8e4nxTcDJpMpAvIXGMAnc5-okB1jakQRZUF9_rdgB8jOevC8Z8CAbgkl2OygM9ck3nljB4a3JYgc9A3URadjmnkXaGyjvz66G11Q7kfD3k7Dum9LEOEBi57gphYl8ncporsEGA0Kc3RfHKQN_mUqyjkekupU7ggmlZ6FgfdraXawftrf794iI1RTRIeX0OG1dLv-dIVIQ00wJCyCog3AlgkJIeU4_U3mW6Bif2MIlvkLNBSXhTmjxPK-SF5kdNDCR7dO-dBv3aumB_kJwmR0PUqniDThG51sC0KXWV-jXPoGaW0FcN2DWfVaohX2KREtcU1gJyg/file).
+
+## Details
+
+There are two ways to specify ssaggregate, depending on whether the 
+industry exposure weights are saved in "long" format (unique rows for 
+industry x location) in a separate dataset `shares` or in "wide" format 
+(unique rows for location and columns for each industry) as part of `df`. 
+In general `ssaggregate` will execute faster with "long" exposure weights. 
+See the examples for proper syntax in both cases.
+
+In the "long" case the dataset in memory must be uniquely identified by the cross-sectional variables in `l` and, when applicable, the period identifiers in `t`. The separate shares dataset is given by `shares` and should be uniquely indexed by the variables in `l` and `n` (and `t`, when specified). `s` should contain the name of the exposure weight variable, and the two datasets should contain only matching values of `l` and `t`.
+ 
+In the "wide" case the `s` option should contain the common stub of the names of exposure weight variables, and `n` should contain the target name of the shock identifier. For example, `s = "share"` should be specified when the exposure variables are named share101, share102, etc., with 101 and 102 being values of the shock identifier in `n`.  The string option should be specified when the shock identifer is a string variable. Missing values in any of the exposure weight variables are interpreted as zeros. The dataset in memory may be a panel or repeated cross section, with periods indexed by `t`.
+
+In both cases there should be no missing values for the location-level variables, conditional on any if and in sample restrictions. The resulting industry-level dataset will contain exposure-weighted de-meaned averages of the location-level variables, along with the average exposure weight `s_n`. This dataset will be be indexed by the variables in `n` (and `t`, when specified).
+
+When the `controls` option is included the location-level variables are first residualized by the control variables. Formula following `fixest::feols`. Fixed effects specified after "`|`".The transformation of variable `y` is also named `y`.
+
+Including the addmissing option generates a "missing industry" observation, with exposure weights equal to one minus the sum of a location's exposure weights. Borusyak, Hull, and Jaravel (2020) recommend including this option when the the sum of exposure weights varies across locations (see Section 3.2). The missing industry observations will be identified by `NA` in `n`.
+
+Note that no information on industry shocks is used in the execution of ssaggregate; once run, users can merge shocks and any industry-level controls to the aggregated dataset.  They can then estimate and validate quasi-experimental shift-share IV regressions with other Stata procedures. See Section 4 of Borusyak, Hull, and Jaravel (2020) for details and below for examples of such procedures.
+
+
+## `ssaggregate` examples
+
+Using sepearate "long" share dataset:
+
+```{r}
+library(ssaggregate)
+library(fixest)
+
+data("df")
+data("shares")
+industry = ssaggregate(
+  data = df,
+  shares = shares,
+  vars = ~ y + x + z + l_sh_routine33,
+  weights = "wei",
+  n = "sic87dd",
+  t = "year",
+  s = "ind_share",
+  l = "czone",
+  controls = ~ t2 + Lsh_manuf
+)
+
+head(industry)
+```
+
+Using "wide" shares in dataset:
+
+```{r}
+data("df_wide")
+industry_df = ssaggregate(
+  data = df_wide,
+  vars = ~ y + x + z + l_sh_routine33,
+  weights = "wei",
+  n = "sic87dd",
+  t = "year",
+  s = "ind_share",
+  controls = ~ t2 + Lsh_manuf
+)
+
+head(industry_df)
+```
+
+Including the "missing industry":
+
+```{r}
+data("df")
+data("shares")
+industry_df = ssaggregate(
+  data = df,
+  shares = shares,
+  vars = ~ y + x + z + l_sh_routine33,
+  weights = "wei",
+  n = "sic87dd",
+  t = "year",
+  s = "ind_share",
+  l = "czone",
+  controls = ~ t2 + Lsh_manuf,
+  addmissing = TRUE
+)
+
+head(industry_df)
+```
+
+After aggregation, shocks and any shock-level controls can be merged on to the new dataset. For example, after the previous command a user could run
+ 
+```{r}
+industry_df[is.na(sic87dd), sic87dd := 0]
+data("shocks")
+data("industries")
+industry_df = merge(industry_df, shocks, by=c("sic87dd", "year"), all.x=T)
+industry_df = merge(industry_df, industries, by=c("sic87dd"), all.x=T)
+
+industry_df[is.na(g), let(g = 0, year = 0, sic3 = 0)]
+```
+ 
+
+## Shock-level IV regression examples
+
+Basic shift-share IV:
+
+```{r}
+fixest::feols(y ~ year | 0 | x ~ g, data = industry_df, 
+              weights = ~ s_n, vcov = "hc1")
+```
+
+Conditional shift-share IV with clustered standard errors:
+
+```{r}
+fixest::feols(y ~ year | 0 | x ~ g, data = industry_df[g < 45, ], 
+              weights = ~ s_n, cluster = ~ sic3)
+```
+
+Shift-share reduced form regression (`y` on `z`):
+
+```{r}
+fixest::feols(y ~ year | 0 | z ~ g, data = industry_df, 
+              weights = ~ s_n, vcov = "hc1")
+```
+
+Shock-level balance check:
+
+```{r}
+fixest::feols(l_sh_routine33 ~ g + year, data = industry_df,
+              weights = ~ s_n, vcov = "hc1")
+```
+
+
+*See Borusyak, Hull, and Jaravel (2020) for other examples of shock-level 
+analyses and guidance on specifying and validating a quasi-experimental 
+shift-share IV.*
