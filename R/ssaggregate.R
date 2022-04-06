@@ -52,12 +52,12 @@
 #'    Note that no information on industry shocks is used in the execution of 
 #'    ssaggregate; once run, users can merge shocks and any industry-level 
 #'    controls to the aggregated dataset.  They can then estimate and validate
-#'    quasi-experimental shift-share IV regressions with other Stata procedures. 
+#'    quasi-experimental shift-share IV regressions with other R procedures. 
 #'    See Section 4 of Borusyak, Hull, and Jaravel (2022) for details and 
 #'    below for examples of such procedures.
 #'
 #' @param data Data.frame of data
-#' @param vars RHS formula of variables, i.e. `~ y x ...`
+#' @param vars RHS formula of variables, i.e. `~ y + x + ...`
 #' @param weights String. Variable name indicating the weights used
 #' @param n String. Variable name indicating industry identifiers
 #' @param l String. Variable name indicating location identifiers
@@ -263,6 +263,7 @@ ssaggregate = function(data, vars, weights = NULL, n, shares = NULL, s,
     
     # Make sure S_l is controlled for (r^2 = 1)
     rsq = fixest::feols(fixest::xpd(lhs = s, rhs = controls), data = temp) |> fixest::r2(type="r2")
+    if(is.na(rsq)) rsq = 1
     if(rsq < 0.9999) {
       if(!addmissing) {
         print(
@@ -276,12 +277,15 @@ ssaggregate = function(data, vars, weights = NULL, n, shares = NULL, s,
     }
   }
   
+  weights_vec = NULL
+  if(!is.null(weights)) weights_vec = data[[weights]]
+  
   # Residualize vars by control variables
   data[,
        c(var_names) := lapply(var_names, \(x) {
          fixest::feols(
            fixest::xpd(lhs = x, rhs = controls), 
-           data = data, weights=data[[weights]]
+           data = data, weights = weights_vec
          ) |> 
            stats::resid()
        })
