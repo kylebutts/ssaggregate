@@ -11,6 +11,20 @@ dataset to a dataset of exposure-weighted “industry-level” aggregates,
 as described in [Borusyak, Hull, and Jaravel
 (2022)](https://uc6b7982a5764cd8c439602fced8.dl.dropboxusercontent.com/cd/0/inline2/BhreAHbJxwFfC325p4h_eLzzk9UsTf2ILha-np-4EXHOruYsWACqtHjKLIyjStn8b1nhJGZj99mEZjoc1pDf1wsdkRzdug_MrLsc_sd8e4nxTcDJpMpAvIXGMAnc5-okB1jakQRZUF9_rdgB8jOevC8Z8CAbgkl2OygM9ck3nljB4a3JYgc9A3URadjmnkXaGyjvz66G11Q7kfD3k7Dum9LEOEBi57gphYl8ncporsEGA0Kc3RfHKQN_mUqyjkekupU7ggmlZ6FgfdraXawftrf794iI1RTRIeX0OG1dLv-dIVIQ00wJCyCog3AlgkJIeU4_U3mW6Bif2MIlvkLNBSXhTmjxPK-SF5kdNDCR7dO-dBv3aumB_kJwmR0PUqniDThG51sC0KXWV-jXPoGaW0FcN2DWfVaohX2KREtcU1gJyg/file).
 
+To install `ssaggregate`, run the following:
+
+``` r
+library(devtools)
+devtools::install_github("kylebutts/ssaggregate")
+```
+
+Note that this package requries the most recent dev version of
+`data.table`. To install, use the following:
+
+``` r
+data.table::update_dev_pkg()
+```
+
 ## Details
 
 There are two ways to specify ssaggregate, depending on whether the
@@ -110,14 +124,10 @@ industry_df = ssaggregate(
   s = "ind_share",
   controls = ~ t2 + Lsh_manuf
 )
-#> Warning: Invalid .internal.selfref detected and fixed by taking a (shallow)
-#> copy of the data.table so that := can add this new column by reference. At an
-#> earlier point, this data.table has been copied by R (or was created manually
-#> using structure() or similar). Avoid names<- and attr<- which in R currently
-#> (and oddly) may copy the whole data.table. Use set* syntax instead to avoid
-#> copying: ?set, ?setnames and ?setattr. If this message doesn't help, please
-#> report your use case to the data.table issue tracker so the root cause can be
-#> fixed or this message improved.
+#> Warning: Invalid .internal.selfref detected and fixed by taking a (shallow) copy of the data.table so that := can add this new column by reference. At an earlier point,
+#> this data.table has been copied by R (or was created manually using structure() or similar). Avoid names<- and attr<- which in R currently (and oddly) may copy the whole
+#> data.table. Use set* syntax instead to avoid copying: ?set, ?setnames and ?setattr. If this message doesn't help, please report your use case to the data.table issue
+#> tracker so the root cause can be fixed or this message improved.
 
 head(industry_df)
 #>    sic87dd  year          s_n          y          x           z l_sh_routine33

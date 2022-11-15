@@ -186,7 +186,7 @@
 #'   
 #' @export
 ssaggregate = function(data, vars, weights = NULL, n, shares = NULL, s, 
-                        l = NULL, t, controls, addmissing = F) {
+                        l = NULL, t = NULL, controls = ~ 1, addmissing = F) {
   
   data.table::setDT(data)
   if(!is.null(shares)) data.table::setDT(shares)
@@ -228,24 +228,45 @@ ssaggregate = function(data, vars, weights = NULL, n, shares = NULL, s,
   # If sum of shares varies, will verify S_l is controlled for
   check_controls = (stats::sd(shares[[s]]) > 10^-5)
 
-  # Calculate total s_l
-  s_total = paste0(s, "0")
-  shares[, 
-         s_total := sum(s),
-         by = list(l, t), 
-         env = list(s_total = s_total, s = s, l = l, t = t)
-   ]
+  if(is.null(t)) {
+    # Calculate total s_l
+    s_total = paste0(s, "0")
+    shares[, 
+          s_total := sum(s),
+          by = list(l), 
+          env = list(s_total = s_total, s = s, l = l)
+    ]
 
-  # 1 - \sum s_ln
-  shares_missing = shares[,
-    list(s = sum(s)),
-    by = list(l, t),
-    env = list(s = s, l = l, t = t)
-  ][,
-    # calculate missing share
-    s := 1 - s,
-    env = list(s = s)
-  ]
+    # 1 - \sum s_ln
+    shares_missing = shares[,
+      list(s = sum(s)),
+      by = list(l),
+      env = list(s = s, l = l)
+    ][,
+      # calculate missing share
+      s := 1 - s,
+      env = list(s = s)
+    ]
+  } else {
+    # Calculate total s_l
+    s_total = paste0(s, "0")
+    shares[, 
+          s_total := sum(s),
+          by = list(l, t), 
+          env = list(s_total = s_total, s = s, l = l, t = t)
+    ]
+
+    # 1 - \sum s_ln
+    shares_missing = shares[,
+      list(s = sum(s)),
+      by = list(l, t),
+      env = list(s = s, l = l, t = t)
+    ][,
+      # calculate missing share
+      s := 1 - s,
+      env = list(s = s)
+    ]
+  }
 
   # If addmissing, append shares_missing as an NA industry
   if (addmissing) {
@@ -259,7 +280,11 @@ ssaggregate = function(data, vars, weights = NULL, n, shares = NULL, s,
 
   if (check_controls) {
     # Add missing shares
-    temp = merge(data, shares_missing, by = c(l, t))
+    if(is.null(t)) {
+      temp = merge(data, shares_missing, by = c(l))
+    } else {
+      temp = merge(data, shares_missing, by = c(l, t))
+    }
     
     # Make sure S_l is controlled for (r^2 = 1)
     rsq = fixest::feols(fixest::xpd(lhs = s, rhs = controls), data = temp) |> fixest::r2(type="r2")
@@ -294,7 +319,11 @@ ssaggregate = function(data, vars, weights = NULL, n, shares = NULL, s,
   
   # Merge in shares
   if(wideformat) data[, .SD, .SDcols = !grepl(s, colnames(data))]
-  data = merge(data, shares, by = c(l, t))
+  if(is.null(t)) {
+    data = merge(data, shares, by = c(l))
+  } else {
+    data = merge(data, shares, by = c(l, t))
+  }
   
   
   # Collapse to industry level
@@ -303,21 +332,37 @@ ssaggregate = function(data, vars, weights = NULL, n, shares = NULL, s,
   }
   
   
-  collapsed = data[,
-       c(
-         s_n = sum(s),
-         var_names = lapply(.SD, \(x) { sum(x * s/sum(s)) })
-       ),
-       by = list(n, t),
-       .SDcols = var_names,
-       env = list(n = n, t = t, s = s)
-   ][
-     ,
-     s_n := s_n/sum(s_n)
-   ][
-     order(n, t),
-     env = list(n = n, t = t)
-   ]
+  if(is.null(t)) {
+    collapsed = data[,
+        c(
+          s_n = sum(s),
+          var_names = lapply(.SD, \(x) { sum(x * s/sum(s)) })
+        ),
+        by = list(n),
+        .SDcols = var_names,
+        env = list(n = n, s = s)
+    ][,
+      s_n := s_n/sum(s_n)
+    ][
+      order(n),
+      env = list(n = n)
+    ]
+  } else {
+    collapsed = data[,
+        c(
+          s_n = sum(s),
+          var_names = lapply(.SD, \(x) { sum(x * s/sum(s)) })
+        ),
+        by = list(n, t),
+        .SDcols = var_names,
+        env = list(n = n, t = t, s = s)
+    ][,
+      s_n := s_n/sum(s_n)
+    ][
+      order(n, t),
+      env = list(n = n, t = t)
+    ]
+  }
   
   return(collapsed)
 }
