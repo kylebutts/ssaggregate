@@ -3,7 +3,6 @@
 \docType{package}
 \name{ssaggregate-package}
 \alias{ssaggregate-package}
-\alias{_PACKAGE}
 \title{ssaggregate: Create industry-level aggregates for shift-share IV}
 \description{
 ssaggregate converts "location-level" variables in a shift-share IV dataset to a dataset of exposure-weighted "industry-level" aggregates, as described in Borusyak, Hull, and Jaravel (2022).

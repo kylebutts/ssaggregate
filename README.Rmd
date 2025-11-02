@@ -42,7 +42,7 @@ In the "wide" case the `s` option should contain the common stub of the names of
 
 In both cases there should be no missing values for the location-level variables, conditional on any if and in sample restrictions. The resulting industry-level dataset will contain exposure-weighted de-meaned averages of the location-level variables, along with the average exposure weight `s_n`. This dataset will be be indexed by the variables in `n` (and `t`, when specified).
 
-When the `controls` option is included the location-level variables are first residualized by the control variables. Formula following `fixest::feols`. Fixed effects specified after "`|`".The transformation of variable `y` is also named `y`.
+When the `controls` option is included the location-level variables are first residualized by the control variables. Formula following `feols`. Fixed effects specified after "`|`".The transformation of variable `y` is also named `y`.
 
 Including the addmissing option generates a "missing industry" observation, with exposure weights equal to one minus the sum of a location's exposure weights. Borusyak, Hull, and Jaravel (2022) recommend including this option when the the sum of exposure weights varies across locations (see Section 3.2). The missing industry observations will be identified by `NA` in `n`.
 
@@ -55,11 +55,12 @@ Using sepearate "long" share dataset:
 
 ```{r}
 library(ssaggregate)
+library(data.table)
 library(fixest)
 
 data("df")
 data("shares")
-industry = ssaggregate(
+industry_df = ssaggregate(
   data = df,
   shares = shares,
   vars = ~ y + x + z + l_sh_routine33,
@@ -71,7 +72,7 @@ industry = ssaggregate(
   controls = ~ t2 + Lsh_manuf
 )
 
-head(industry)
+head(industry_df)
 ```
 
 Using "wide" shares in dataset:
@@ -118,41 +119,50 @@ After aggregation, shocks and any shock-level controls can be merged on to the n
 industry_df[is.na(sic87dd), sic87dd := 0]
 data("shocks")
 data("industries")
-industry_df = merge(industry_df, shocks, by=c("sic87dd", "year"), all.x=T)
-industry_df = merge(industry_df, industries, by=c("sic87dd"), all.x=T)
-
+industry_df = merge(
+  industry_df,
+  shocks,
+  by = c("sic87dd", "year"),
+  all.x = TRUE
+)
+industry_df = merge(industry_df, industries, by = c("sic87dd"), all.x = TRUE)
 industry_df[is.na(g), let(g = 0, year = 0, sic3 = 0)]
 ```
- 
 
 ## Shock-level IV regression examples
 
 Basic shift-share IV:
 
 ```{r}
-fixest::feols(y ~ i(year) | 0 | x ~ g, data = industry_df, 
-              weights = ~ s_n, vcov = "hc1")
+feols(y ~ i(year) | 0 | x ~ g, data = industry_df, weights = ~s_n, vcov = "hc1")
 ```
 
 Conditional shift-share IV with clustered standard errors:
 
 ```{r}
-fixest::feols(y ~ i(year) | 0 | x ~ g, data = industry_df[g < 45, ], 
-              weights = ~ s_n, cluster = ~ sic3)
+feols(
+  y ~ i(year) | 0 | x ~ g,
+  data = industry_df[g < 45, ],
+  weights = ~s_n,
+  cluster = ~sic3
+)
 ```
 
 Shift-share reduced form regression (`y` on `z`):
 
 ```{r}
-fixest::feols(y ~ i(year) | 0 | z ~ g, data = industry_df, 
-              weights = ~ s_n, vcov = "hc1")
+feols(y ~ i(year) | 0 | z ~ g, data = industry_df, weights = ~s_n, vcov = "hc1")
 ```
 
 Shock-level balance check:
 
 ```{r}
-fixest::feols(l_sh_routine33 ~ g + i(year), data = industry_df,
-              weights = ~ s_n, vcov = "hc1")
+feols(
+  l_sh_routine33 ~ g + i(year),
+  data = industry_df,
+  weights = ~s_n,
+  vcov = "hc1"
+)
 ```
 
 

@@ -195,7 +195,7 @@ ssaggregate = function(
   l = NULL,
   t = NULL,
   controls = ~1,
-  addmissing = F
+  addmissing = FALSE
 ) {
   data.table::setDT(data)
   if (!is.null(shares)) {
@@ -284,8 +284,8 @@ ssaggregate = function(
     shares_missing[, n := NA, env = list(n = n)]
     shares = data.table::rbindlist(
       list(shares_missing, shares),
-      use.names = T,
-      fill = T
+      use.names = TRUE,
+      fill = TRUE
     )
   }
 
@@ -348,7 +348,7 @@ ssaggregate = function(
     collapsed = data[,
       c(
         s_n = sum(s),
-        var_names = lapply(.SD, \(x) {
+        lapply(.SD, \(x) {
           sum(x * s / sum(s))
         })
       ),
