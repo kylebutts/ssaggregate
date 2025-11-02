@@ -1,7 +1,7 @@
 #' Autor, Dorn, and Hanson (2013)
 #'
 #' A dataset containing commuting-zone panel data for 1990-2000 from Autor,
-#'   Dorn, and Hanson (2013). This dataset is in "long" format with shares 
+#'   Dorn, and Hanson (2013). This dataset is in "long" format with shares
 #'   stored in `ssaggregate::shares`
 #'
 #' @format A data frame with 1444 rows and 243 variables
@@ -31,7 +31,7 @@
 #' Autor, Dorn, and Hanson (2013)
 #'
 #' A dataset containing commuting-zone panel data for 1990-2000 from Autor,
-#'   Dorn, and Hanson (2013). This dataset is in a "wide" format with industry 
+#'   Dorn, and Hanson (2013). This dataset is in a "wide" format with industry
 #'   shares as column variables
 #'
 #' @format A data frame with 1444 rows and 640 variables
